@@ -1,5 +1,6 @@
-#include <iostream>
 #include "scanner.h"
+#include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -7,16 +8,16 @@ static void usage(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
-	if(argc != 2)
+	if(argc != 3)
 	{
 		usage(argc, argv);
 		std::exit(1);
 	}
 
 	scanner *s;
-	if(string(argv[1]) == "table") 
+	if(strcmp(argv[1], "table") == 0)
 		s = new table_scanner(argv[2]);
-	else if(string(argv[1]) == "explicit")
+	else if(strcmp(argv[1], "explicit") == 0)
 		s = new explicit_scanner(argv[2]);
 	else
 	{
