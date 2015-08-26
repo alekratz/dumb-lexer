@@ -8,6 +8,10 @@
 
 class scanner
 {
+	/* typedefs */
+private:
+	typedef scanner this_t;
+	/* ctor/dtor */
 public:
 	scanner(const std::string& source_text);
 	~scanner();
@@ -63,6 +67,7 @@ private:
 class table_scanner :
 	public scanner
 {
+	/* typedefs */
 private:
 	typedef scanner base_t;
 	typedef table_scanner this_t;
@@ -101,9 +106,17 @@ private:
 /**
  * Explicit implementation of the scanner
  */
-/*
+
 class explicit_scanner :
 	public scanner
 {
+	/* typedefs */
+private:
+	typedef scanner base_t;
+	typedef explicit_scanner this_t;
+	/* ctor/dtor */
+public:
+	explicit_scanner(const std::string& source_text);
+	~explicit_scanner()
+		{ }
 }
-*/
