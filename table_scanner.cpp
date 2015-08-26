@@ -30,7 +30,7 @@ table_scanner::table_scanner(const std::string& source_text)
   , m_final_states({ 1, 3, 5, 8 })
 {
 }
- 
+
 token table_scanner::next()
 {
   token result;
@@ -54,7 +54,7 @@ token table_scanner::next()
     if(have_reached_end())
       break;
     // check to see if it's an end state; this is where we do lookaheads
-    if(VEC_CONTAINS(m_final_states, my_state))
+    if(is_final_state(my_state))
     {
       last_final_state = my_state;
       last_final_state_idx = source_index();
@@ -72,36 +72,56 @@ token table_scanner::next()
     my_state = c_transition_table[ my_state ][ table_index ];
   }
   
-  tt_t type = tt_t::error;
-  
-  // todo: make this its own method rather than using gotos
-state_to_type:
-  switch(my_state)
+  tt_t type = state_to_type(my_state);
+  // error? let's check to see if we had a valid final state at one point
+  if(type == tt_t::error && last_final_state_idx != -1)
   {
-  case 1:
-    type = tt_t::b;
-    break;
-  case 3:
-  case 8:
-    type = tt_t::bab_plus;
-    break;
-  case 5:
-    type = tt_t::ba_star_b;
-    break;
-  default:
-    if(last_final_state != -1) // there was in fact a previous final state, so we can reset to that 
+    // set the last state back to the old final state
+    my_state = last_final_state;
+    // unconsume the character stream
+    while(source_index() != last_final_state_idx)
     {
-      my_state = last_final_state;
-      while(source_index() != last_final_state_idx)
-      {
-        result.annotation.erase(result.annotation.size() - 1);
-        uncons();
-      }
-      goto state_to_type;
+      result.annotation.erase(result.annotation.size() - 1);
+      uncons();
     }
-    break;
+    // get the new type from the state
+    type = state_to_type(my_state);
   }
+
   result.type = type;
   return result;
 }
 
+int32_t table_scanner::tindex(char c)
+{
+  switch(c)
+  {
+  case 'a':
+  case 'A':
+    return 0;
+  case 'b':
+  case 'B':
+    return 1;
+  default:
+    return 2;
+  }
+}
+
+tt_t table_scanner::state_to_type(int32_t state)
+{
+  switch(state)
+  {
+  case 1:
+    return tt_t::b;
+  case 3:
+  case 8:
+    return tt_t::bab_plus;
+  case 5:
+    return tt_t::ba_star_b;
+  default:
+    return tt_t::error;
+  }
+}
+
+bool table_scanner::is_final_state(int32_t state)
+  { return VEC_CONTAINS(m_final_states, state); }

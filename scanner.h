@@ -79,24 +79,22 @@ public:
 	/* operations */
 public:
 	virtual token next();
+
 private:
 	/**
 	 * Gets the table index of the given character
 	 */
-	int32_t tindex(char c)
-	{
-		switch(c)
-		{
-		case 'a':
-		case 'A':
-			return 0;
-		case 'b':
-		case 'B':
-			return 1;
-		default:
-			return 2;
-		}
-	}
+	int32_t tindex(char c);
+	/**
+	 * Converts a DFA state into a token type.
+	 * This is dependent on the final states of the lexer.
+	 */
+	tt_t state_to_type(int32_t state);
+
+	/** 
+	 * Gets whether the input state is a final state or not.
+	 */
+	bool is_final_state(int32_t state);
 
 private:
 	const int32_t c_transition_table[10][3];
