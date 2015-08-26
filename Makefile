@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=-g -O2 -MP -MMD -std=c++0x
 TARGET=parseman
-CPPFILES=parseman.cpp scanner.cpp token.cpp
+CPPFILES=parseman.cpp scanner.cpp token.cpp table_scanner.cpp explicit_scanner.cpp
 BINDIR=bin
 OFILES=$(CPPFILES:%.cpp=$(BINDIR)/%.o)
 DEPDIR=$(BINDIR)

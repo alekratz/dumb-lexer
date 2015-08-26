@@ -119,4 +119,7 @@ public:
 	explicit_scanner(const std::string& source_text);
 	~explicit_scanner()
 		{ }
-}
+	/* operations */
+public:
+	virtual token next();
+};

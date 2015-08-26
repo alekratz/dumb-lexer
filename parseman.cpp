@@ -7,12 +7,23 @@ static void usage(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
-	if(argc == 1)
+	if(argc != 2)
 	{
 		usage(argc, argv);
 		std::exit(1);
 	}
-	scanner *s = new table_scanner(argv[1]);
+
+	scanner *s;
+	if(string(argv[1]) == "table") 
+		s = new table_scanner(argv[2]);
+	else if(string(argv[1]) == "explicit")
+		s = new explicit_scanner(argv[2]);
+	else
+	{
+		cout << "error: unknown scanner type" << endl;
+		usage(argc, argv);
+		std::exit(1);
+	}
 	
 	token result;
 	do
@@ -50,5 +61,6 @@ int main(int argc, char **argv)
 
 static void usage(int argc, char **argv)
 {
-	cout << "usage: " << argv[0] << " source" << endl;
+	cout << "usage: " << argv[0] << " type source" << endl;
+	cout << "the type argument may be either \"explicit\" or \"table\"" << endl;
 }
