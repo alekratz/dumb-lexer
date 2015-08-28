@@ -9,6 +9,7 @@ using namespace std;
 
 explicit_scanner::explicit_scanner(const string& source_text)
   : base_t(source_text)
+  , stated_t(9, { 1, 3, 5, 8 }) // trap state, final state
 { }
 
 token explicit_scanner::next()
@@ -16,7 +17,8 @@ token explicit_scanner::next()
   token result;
   result.type = tt_t::error;
   bool should_scan = true;
-  int32_t my_state = 0;
+  int32_t my_state = 0,
+          last_final_state = -1;
   const int32_t TRAP_STATE = 9;
 
   while(should_scan)
@@ -120,3 +122,5 @@ token explicit_scanner::next()
   return result;
 }
 
+bool explicit_scanner::is_final_state(int32_t state)
+  { return VEC_CONTAINS(m_final_states, state); }

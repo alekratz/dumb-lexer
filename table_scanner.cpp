@@ -1,6 +1,5 @@
 #include "scanner.h"
 #include "token.h"
-#include "util.h"
 #include <string>
 #include <cstdint>
 #include <algorithm>
@@ -14,8 +13,9 @@ using namespace std;
 
 table_scanner::table_scanner(const std::string& source_text)
   : base_t(source_text)
-  , c_transition_table({ 
-  //    a  b  trap?
+  , stated_t (9, { 1, 3, 5, 8 }) // trap state, final states 
+  , c_transition_table { 
+  //  a  b  trap
     { 9, 1, 9 }, // 0
     { 2, 5, 9 }, // 1 F
     { 4, 3, 9 }, // 2
@@ -26,8 +26,7 @@ table_scanner::table_scanner(const std::string& source_text)
     { 9, 8, 9 }, // 7
     { 9, 6, 9 }, // 8 F
     { 9, 9, 9 }  // 9 (trap)
-  })
-  , m_final_states { 1, 3, 5, 8, }
+              }
 { }
 
 token table_scanner::next()
@@ -121,6 +120,3 @@ tt_t table_scanner::state_to_type(int32_t state)
     return tt_t::error;
   }
 }
-
-bool table_scanner::is_final_state(int32_t state)
-  { return VEC_CONTAINS(m_final_states, state); }

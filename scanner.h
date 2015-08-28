@@ -4,7 +4,31 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <initializer_list>
 #include "token.h"
+#include "util.h"
+
+/**
+ * Abstract class that gives the quality of states
+ */
+class stated
+{
+public:
+	stated(int32_t trap_state, std::initializer_list<int32_t> final_states) 
+		: m_trap_state(trap_state)
+		, m_final_states(final_states)
+		{ }
+
+	~stated() { }
+protected:
+	bool is_final_state(int32_t state)
+		{ return VEC_CONTAINS(m_final_states, state); }
+	bool is_trap_state(int32_t state)
+		{ return m_trap_state == state; } // TODO: maybe make there be many trap states?
+private: // aka "readonly"
+	int32_t m_trap_state;
+	std::vector<int32_t> m_final_states;
+};
 
 class scanner
 {
@@ -64,12 +88,14 @@ private:
 /**
  * Transition state table implementation of the scanner
  */
-class table_scanner :
-	public scanner
+class table_scanner
+	: public scanner
+	, protected stated
 {
 	/* typedefs */
 private:
 	typedef scanner base_t;
+	typedef stated stated_t;
 	typedef table_scanner this_t;
 	/* ctor/dtor */
 public:
@@ -80,6 +106,7 @@ public:
 public:
 	virtual token next();
 
+	/* properties */
 private:
 	/**
 	 * Gets the table index of the given character
@@ -91,11 +118,6 @@ private:
 	 */
 	tt_t state_to_type(int32_t state);
 
-	/** 
-	 * Gets whether the input state is a final state or not.
-	 */
-	bool is_final_state(int32_t state);
-
 private:
 	const int32_t c_transition_table[10][3];
 	std::vector<int32_t> m_final_states;
@@ -105,19 +127,28 @@ private:
  * Explicit implementation of the scanner
  */
 
-class explicit_scanner :
-	public scanner
+class explicit_scanner 
+	: public scanner
+	, protected stated
 {
 	/* typedefs */
 private:
 	typedef scanner base_t;
+	typedef stated stated_t;
 	typedef explicit_scanner this_t;
 	/* ctor/dtor */
 public:
 	explicit_scanner(const std::string& source_text);
 	~explicit_scanner()
 		{ }
+	/* properties */
+private:
+	bool is_final_state(int32_t state);
+
 	/* operations */
 public:
 	virtual token next();
+	/* members */
+private:
+	std::vector<int32_t> m_final_states;
 };
