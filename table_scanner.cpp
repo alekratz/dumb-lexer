@@ -27,9 +27,8 @@ table_scanner::table_scanner(const std::string& source_text)
     { 9, 6, 9 }, // 8 F
     { 9, 9, 9 }  // 9 (trap)
   })
-  , m_final_states({ 1, 3, 5, 8 })
-{
-}
+  , m_final_states { 1, 3, 5, 8, }
+{ }
 
 token table_scanner::next()
 {
