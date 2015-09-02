@@ -34,7 +34,7 @@ token explicit_scanner::next()
             : c;
     };
     m_curr = ab_to_lower(m_curr);
-    char lahead = lookahead(); // look ahead one character from where we're at
+    char lahead = ab_to_lower(lookahead());
     switch(my_state)
     {
     case 0:
@@ -117,10 +117,40 @@ token explicit_scanner::next()
         my_state = TRAP_STATE;
       break;
     }
+
+    if(is_final_state(my_state))
+      last_final_state = my_state;
+    else if(my_state == TRAP_STATE)
+    {
+      // check to see if we have a final state; if so, get what we had before
+      if(last_final_state != -1)
+      {
+        my_state = last_final_state;
+        should_scan = false;
+      }
+      else
+      {
+        // oops, we just fucked up royally didn't we
+        should_scan = false;
+      }
+    }
   }
 
   return result;
 }
 
-bool explicit_scanner::is_final_state(int32_t state)
-  { return VEC_CONTAINS(m_final_states, state); }
+tt_t explicit_scanner::state_to_type(int32_t state)
+{
+  switch(state)
+  {
+  case 1:
+    return tt_t::b;
+  case 3:
+  case 8:
+    return tt_t::bab_plus;
+  case 5:
+    return tt_t::ba_star_b;
+  default:
+    return tt_t::error;
+  }
+}

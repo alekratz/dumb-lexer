@@ -25,6 +25,9 @@ protected:
 		{ return VEC_CONTAINS(m_final_states, state); }
 	bool is_trap_state(int32_t state)
 		{ return m_trap_state == state; } // TODO: maybe make there be many trap states?
+		
+	virtual tt_t state_to_type(int32_t state) = 0;
+	
 private: // aka "readonly"
 	int32_t m_trap_state;
 	std::vector<int32_t> m_final_states;
@@ -106,21 +109,18 @@ public:
 public:
 	virtual token next();
 
+protected:
+	virtual tt_t state_to_type(int32_t state);
+
 	/* properties */
 private:
 	/**
 	 * Gets the table index of the given character
 	 */
 	int32_t tindex(char c);
-	/**
-	 * Converts a DFA state into a token type.
-	 * This is dependent on the final states of the lexer.
-	 */
-	tt_t state_to_type(int32_t state);
 
 private:
 	const int32_t c_transition_table[10][3];
-	std::vector<int32_t> m_final_states;
 };
 
 /**
@@ -141,14 +141,10 @@ public:
 	explicit_scanner(const std::string& source_text);
 	~explicit_scanner()
 		{ }
-	/* properties */
-private:
-	bool is_final_state(int32_t state);
-
 	/* operations */
 public:
 	virtual token next();
-	/* members */
-private:
-	std::vector<int32_t> m_final_states;
+protected:
+	virtual tt_t state_to_type(int32_t state);
+
 };
