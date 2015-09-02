@@ -1,6 +1,6 @@
 CXX=g++
 STD=c++0x
-CXXFLAGS=-g -O2 -MP -MMD -std=$(STD)
+CXXFLAGS=-g -O0 -MP -MMD -std=$(STD)
 TARGET=parseman
 CPPFILES=parseman.cpp scanner.cpp token.cpp table_scanner.cpp explicit_scanner.cpp
 BINDIR=bin

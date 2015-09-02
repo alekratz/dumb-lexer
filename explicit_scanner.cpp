@@ -15,26 +15,30 @@ explicit_scanner::explicit_scanner(const string& source_text)
 token explicit_scanner::next()
 {
   token result;
-  result.type = tt_t::error;
-  bool should_scan = true;
-  int32_t my_state = 0,
-          last_final_state = -1;
-  const int32_t TRAP_STATE = 9;
-
-  while(should_scan)
+  if(have_reached_end())
   {
-    // consume the next character
+    result.type = tt_t::eof;
+    return result;
+  }
+  const int32_t TRAP_STATE = 9;
+  int32_t my_state = 0;
+  int32_t last_final_state = -1;
+  int32_t last_final_state_idx = -1;
+
+  // let's just use lower case characters, mkay?
+  auto ab_to_lower = [](char c) { 
+    return  c == 'A' ? 'a'
+          : c == 'B' ? 'b'
+          : c;
+  };
+
+  while(true)
+  {
+    if(my_state == TRAP_STATE)
+      break;
     cons();
-    if(have_reached_end())
-      break; // break NOW
-    // let's just use lower case characters, mkay?
-    auto ab_to_lower = [](char c) { 
-      return  c == 'A' ? 'a'
-            : c == 'B' ? 'b'
-            : c;
-    };
     m_curr = ab_to_lower(m_curr);
-    char lahead = ab_to_lower(lookahead());
+    result.annotation += m_curr;
     switch(my_state)
     {
     case 0:
@@ -117,25 +121,34 @@ token explicit_scanner::next()
         my_state = TRAP_STATE;
       break;
     }
-
+    // check to see if it's an end state; this is where we do lookaheads
     if(is_final_state(my_state))
-      last_final_state = my_state;
-    else if(my_state == TRAP_STATE)
     {
-      // check to see if we have a final state; if so, get what we had before
-      if(last_final_state != -1)
-      {
-        my_state = last_final_state;
-        should_scan = false;
-      }
-      else
-      {
-        // oops, we just fucked up royally didn't we
-        should_scan = false;
-      }
+      last_final_state = my_state;
+      last_final_state_idx = source_index();
     }
+    // EOF reached
+    if(have_reached_end())
+      break;
+  }
+  
+  tt_t type = state_to_type(my_state);
+  // error? let's check to see if we had a valid final state at one point
+  if(type == tt_t::error && last_final_state_idx != -1)
+  {
+    // set the last state back to the old final state
+    my_state = last_final_state;
+    // unconsume the character stream
+    while(source_index() != last_final_state_idx)
+    {
+      result.annotation.erase(result.annotation.size() - 1);
+      uncons();
+    }
+    // get the new type from the state
+    type = state_to_type(my_state);
   }
 
+  result.type = type;
   return result;
 }
 
